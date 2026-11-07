@@ -1,105 +1,89 @@
- <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HSE SBG Rakaez V9.4</title>
+<title>HSE SBG Rakaez V10.1 FIXED</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-body{background:#0f1115;color:#fff;font-family:system-ui;padding:15px}
+body{background:#0f1115;color:#fff;font-family:Arial;padding:15px;margin:0}
 .card{border:1.5px solid #d4af37;border-radius:18px;padding:16px;background:#151821}
-h2{text-align:center;color:#d4af37}
-canvas{background:#fff;border-radius:12px;width:100%;height:220px;touch-action:none}
+h2{text-align:center;color:#d4af37;margin:5px}
+.item{padding:12px;margin:8px 0;border-radius:10px;cursor:pointer;display:flex;justify-content:space-between;border:1px solid #333;background:#1e2230}
+.item.ok{background:#0a3d1a;border-color:#16a34a}
+.check{background:#ffcc00;color:#000;padding:4px 12px;border-radius:6px;font-weight:900;min-width:30px;text-align:center}
 .btn{width:100%;padding:14px;border-radius:12px;border:0;margin-top:10px;font-size:17px;font-weight:700;cursor:pointer}
 .green{background:#16a34a;color:#fff}
-.blue{background:#2563eb;color:#fff}
 .outline{background:transparent;border:1px solid #d4af37;color:#d4af37}
-input,select{width:100%;padding:10px;border-radius:10px;margin:6px 0;background:#0f1115;color:#fff;border:1px solid #444}
-label{font-size:14px;color:#d4af37}
-.item{border-bottom:1px solid #222;padding:8px 0;display:flex;justify-content:space-between;align-items:center}
+input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #444;background:#222;color:#fff;margin:6px 0;box-sizing:border-box}
+canvas{background:#fff;border-radius:12px;width:100%;height:180px;touch-action:none}
 </style>
 </head>
 <body>
 <div class="card">
-<h2>✍️ توقيع المفتش - اسحب باصبعك</h2>
-<canvas id="sig"></canvas>
-<div style="display:flex;gap:8px;margin-top:8px">
-<button class="btn outline" style="width:50%" onclick="clearSig()">تصفير</button>
-<button class="btn green" style="width:50%" onclick="saveSig()">✅ حفظ التوقيع</button>
-</div>
-
-<label>الموقع / Location</label>
-<input id="loc" placeholder="Rakaez - Zone 3">
-
-<label>اسم المفتش</label>
+<h2>HSE SBG Rakaez V10.1</h2>
 <input id="inspector" value="Adel Mohamed">
-
-<div id="checklist"></div>
-
-<button class="btn green" onclick="sendWA()">📄 تقرير واتساب نظيف</button>
-<button class="btn blue" onclick="exportPDF()">📄 تصدير PDF بالتوقيع</button>
-<button class="btn outline" onclick="clearAll()">تصفير الكل</button>
+<select id="loc"><option>Rakaez Project</option><option>Site Office</option><option>Store</option></select>
+<div id="list"></div>
+<input id="engName" placeholder="Engineer Name">
+<textarea id="notes" placeholder="Notes / Observations"></textarea>
+<p style="text-align:center;margin:10px 0 5px">Signature:</p>
+<canvas id="sig"></canvas>
+<button class="btn outline" onclick="clearSig()">Clear Signature</button>
+<button class="btn green" onclick="genPDF()">Generate PDF V10.1 FIXED</button>
 </div>
-
 <script>
-const canvas=document.getElementById('sig');
-const ctx=canvas.getContext('2d');
-let drawing=false, hasSig=false, sigData="";
-function resize(){canvas.width=canvas.offsetWidth*2;canvas.height=220*2;ctx.scale(2,2);ctx.lineWidth=3;ctx.lineCap='round';ctx.strokeStyle='#000'}
-resize();
-function getPos(e){const r=canvas.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:t.clientX-r.left,y:t.clientY-r.top}}
-canvas.addEventListener('mousedown',e=>{drawing=true;const p=getPos(e);ctx.beginPath();ctx.moveTo(p.x,p.y)});
-canvas.addEventListener('mousemove',e=>{if(!drawing)return;const p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();hasSig=true});
-canvas.addEventListener('mouseup',()=>drawing=false);
-canvas.addEventListener('touchstart',e=>{drawing=true;const p=getPos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault()},{passive:false});
-canvas.addEventListener('touchmove',e=>{if(!drawing)return;const p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();hasSig=true;e.preventDefault()},{passive:false});
-canvas.addEventListener('touchend',()=>drawing=false);
-function clearSig(){ctx.clearRect(0,0,canvas.width,canvas.height);hasSig=false;sigData=""}
-function saveSig(){if(!hasSig){alert('⚠️ وقع الاول');return}sigData=canvas.toDataURL('image/png');localStorage.setItem('adel_sig',sigData);alert('✅ تم حفظ التوقيع')}
-if(localStorage.getItem('adel_sig')){sigData=localStorage.getItem('adel_sig');hasSig=true}
-
-const items=["Safety Helmet","Safety Shoes","Vest","Harness","Scaffold Inspection","Ladder Safety","Electrical Safety","Fire Extinguisher","Housekeeping","Barrication"];
-const list=document.getElementById('checklist');
-items.forEach((it,i)=>{
- const d=document.createElement('div');d.className='item';
- d.innerHTML=`<span>${i+1}. ${it}</span><select id="it${i}"><option>✅ OK</option><option>❌ N/A</option><option>⚠️ Action</option></select>`;
- list.appendChild(d);
+const items=["Safety Helmet","Safety Shoes","Vest","Harness","Scaffold Inspection","Ladder Safety","Electrical Safety","Fire Extinguisher","Housekeeping","Barrication","Tool Box Talk","Work Permit","First Aid Box","Emergency Exit","Signage","Waste Management","Earthing Pit","Lightning Arrester","Safety Net","Handover"];
+let state=Array(20).fill(false);
+let list=document.getElementById('list');
+items.forEach((t,i)=>{
+ let d=document.createElement('div');d.className='item';d.id='i'+i;
+ d.innerHTML='<span>'+(i+1)+'. '+t+'</span><span class="check" id="c'+i+'">--</span>';
+ d.onclick=()=>{state[i]=!state[i];update(i)};list.appendChild(d);
 });
+function update(i){
+ let el=document.getElementById('i'+i);let ch=document.getElementById('c'+i);
+ if(state[i]){el.classList.add('ok');ch.textContent='OK';}else{el.classList.remove('ok');ch.textContent='--';}
+}
+let canvas=document.getElementById('sig'),ctx=canvas.getContext('2d'),draw=false;
+function resize(){let r=window.devicePixelRatio||1;canvas.width=canvas.offsetWidth*r;canvas.height=180*r;ctx.setTransform(r,0,0,r,0,0);ctx.lineWidth=2;ctx.lineCap='round';ctx.strokeStyle='#000';}
+setTimeout(resize,200);
+canvas.addEventListener('pointerdown',e=>{draw=true;ctx.beginPath();ctx.moveTo(e.offsetX,e.offsetY);e.preventDefault()});
+canvas.addEventListener('pointermove',e=>{if(!draw)return;ctx.lineTo(e.offsetX,e.offsetY);ctx.stroke();e.preventDefault()});
+window.addEventListener('pointerup',()=>draw=false);
+function clearSig(){ctx.clearRect(0,0,canvas.width,canvas.height)}
 
-function getReportText(){
- let txt=`*HSE Report - SBG Rakaez*\nInspector: ${document.getElementById('inspector').value}\nLocation: ${document.getElementById('loc').value}\nDate: ${new Date().toLocaleDateString('en-GB')}\n\n`;
- items.forEach((it,i)=>{txt+=`${i+1}. ${it}: ${document.getElementById('it'+i).value}\n`});
- txt+=`\nSigned: ${document.getElementById('inspector').value}`;
- return txt;
-}
-function sendWA(){
- const txt=encodeURIComponent(getReportText());
- window.open(`https://wa.me/?text=${txt}`,'_blank');
-}
-async function exportPDF(){
- if(!hasSig||!sigData){alert('⚠️ وقع الاول ودوس حفظ التوقيع');return}
- const {jsPDF}=window.jspdf;
- const doc=new jsPDF();
- doc.setFont('helvetica','bold');
+function genPDF(){
+ const {jsPDF}=window.jspdf;let doc=new jsPDF();
+ let inspector=document.getElementById('inspector').value||'Adel Mohamed';
+ let loc=document.getElementById('loc').value;
+ let eng=document.getElementById('engName').value||'N/A';
+ let notes=document.getElementById('notes').value||'N/A';
+ let now=new Date();let dateStr=String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear()+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+ doc.setFont('helvetica','bold');doc.setFontSize(14);
  doc.text('HSE Inspection Report - SBG Rakaez',10,15);
- doc.setFont('helvetica','normal');
- doc.setFontSize(11);
- doc.text(`Inspector: ${document.getElementById('inspector').value}`,10,25);
- doc.text(`Location: ${document.getElementById('loc').value}`,10,32);
- doc.text(`Date: ${new Date().toLocaleDateString('en-GB')} ${new Date().toLocaleTimeString()}`,10,39);
- let y=50;
- items.forEach((it,i)=>{
-  if(y>270){doc.addPage();y=15}
-  doc.text(`${i+1}. ${it} : ${document.getElementById('it'+i).value}`,10,y);
-  y+=7;
+ doc.setFont('helvetica','normal');doc.setFontSize(11);
+ doc.text('Inspector: '+inspector,10,25);
+ doc.text('Location: '+loc,10,32);
+ doc.text('Date: '+dateStr,10,39);
+ doc.text('Engineer: '+eng,10,46);
+ let y=55;
+ items.forEach((t,i)=>{
+   let status=state[i]?'OK':'NOT OK';
+   doc.text((i+1)+'. '+t+' : '+status,10,y);
+   y+=7;if(y>275){doc.addPage();y=15}
  });
- if(y>220){doc.addPage();y=15}
- doc.text('Inspector Signature:',10,y+10);
- doc.addImage(sigData,'PNG',10,y+15,60,25);
- doc.text(document.getElementById('inspector').value,10,y+45);
- doc.save(`HSE_Adel_${new Date().toISOString().slice(0,10)}.pdf`);
+ y+=5;doc.text('Notes: '+notes,10,y);
+ y+=10;doc.text('Inspector Signature:',10,y);
+ try{
+  let empty=document.createElement('canvas');empty.width=canvas.width;empty.height=canvas.height;
+  if(canvas.toDataURL()!==empty.toDataURL()){
+    let img=canvas.toDataURL('image/png');
+    doc.addImage(img,'PNG',10,y+5,60,20);
+  }
+ }catch(e){}
+ doc.save('HSE_Adel_'+now.toISOString().slice(0,10)+'.pdf');
 }
-function clearAll(){if(confirm('تصفير؟')){clearSig();localStorage.clear();location.reload()}}
 </script>
 </body>
 </html>
