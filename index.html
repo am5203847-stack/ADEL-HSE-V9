@@ -3,19 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ADEL V10.3 CAMERA+QR FIXED</title>
+<title>ADEL V10.4 CAM+QR WORKING</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 body{background:#000;color:#fff;font-family:Arial;margin:0;padding:10px}
 .top{border:2px solid #00ff88;border-radius:18px;padding:15px;text-align:center;margin-bottom:12px;background:#111}
-.top h1{color:#00ff88;margin:0;font-size:22px}
+.top h1{color:#00ff88;margin:0;font-size:20px}
 .top h2{color:#ffcc00;margin:5px 0;font-size:18px}
 .row{display:flex;gap:0;margin:8px 0}
 .row input{flex:1;padding:12px;border-radius:10px;border:1.5px solid #ffcc00;background:#222;color:#fff;margin:0}
 .row input:first-child{border-top-right-radius:0;border-bottom-right-radius:0}
 .row input:last-child{border-top-left-radius:0;border-bottom-left-radius:0;border-left:0}
 .btn-save{background:#ffcc00;color:#000;padding:12px;border:0;border-radius:30px;width:100%;font-weight:900;font-size:16px;margin:8px 0}
+.qr-box{background:#fff;padding:8px;border-radius:12px;margin:10px auto;width:160px;text-align:center}
+.qr-box img{width:150px;height:150px}
 .cats{border:1.5px solid #ffcc00;border-radius:15px;padding:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;background:#111}
 .cat{padding:10px;border-radius:10px;border:1.5px solid #ffcc00;background:#222;color:#ffcc00;text-align:center;font-weight:700;font-size:13px}
 .cat.active{background:#ffcc00;color:#000}
@@ -26,8 +27,7 @@ body{background:#000;color:#fff;font-family:Arial;margin:0;padding:10px}
 .left{display:flex;align-items:center;gap:8px}
 .cam{background:#222;border:1.5px solid #ffcc00;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:18px}
 .checkbox{width:26px;height:26px}
-.thumb{width:40px;height:40px;border-radius:6px;border:2px solid #00ff88;object-fit:cover}
-.qr-box{background:#fff;padding:10px;border-radius:12px;margin:10px auto;width:140px;text-align:center}
+.thumb{width:45px;height:45px;border-radius:6px;border:2px solid #00ff88;object-fit:cover}
 .inspector-box{margin-top:12px;border:1.5px solid #d4af37;border-radius:12px;padding:12px;background:#151821}
 .inspector-box input,.inspector-box textarea{width:100%;padding:10px;border-radius:8px;border:1px solid #444;background:#222;color:#fff;margin:6px 0;box-sizing:border-box}
 canvas.sig{background:#fff;border-radius:10px;width:100%;height:150px;touch-action:none}
@@ -38,13 +38,13 @@ canvas.sig{background:#fff;border-radius:10px;width:100%;height:150px;touch-acti
 </head>
 <body>
 <div class="top">
-<h1>ADEL V10.3 CAMERA+QR</h1>
+<h1>ADEL V10.4 CAM+QR WORKING</h1>
 <h2>SBG | Rakaez A-4</h2>
 <div class="row"><input id="project" value="Rakaez A-4" oninput="genQR()"><input id="company" placeholder="Company Name" oninput="genQR()"></div>
 <div class="row"><input id="zone" placeholder="Zone" oninput="genQR()"><input id="area" placeholder="Area m2" oninput="genQR()"></div>
 <button class="btn-save" onclick="localStorage.setItem('company',document.getElementById('company').value);alert('Saved')">SAVE Company</button>
 <div id="progress" style="color:#ffcc00;font-weight:700;margin-top:5px">ELEC: 0/20 - 0%</div>
-<div class="qr-box"><div id="qrcode"></div><div style="color:#000;font-size:10px;font-weight:700;margin-top:5px" id="qrtext">QR Report</div></div>
+<div class="qr-box"><img id="qrImg" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=ADEL-SBG" alt="QR"><div style="color:#000;font-size:11px;font-weight:900;margin-top:4px" id="qrtext">QR Report</div></div>
 </div>
 <div class="cats">
 <div class="cat" onclick="setCat('scaffold',event)">Scaffold 30</div>
@@ -62,7 +62,7 @@ canvas.sig{background:#fff;border-radius:10px;width:100%;height:150px;touch-acti
 <p style="text-align:center;color:#ffcc00">Signature:</p>
 <canvas id="sig" class="sig"></canvas>
 <button class="btn outline" onclick="clearSig()">Clear Signature</button>
-<button class="btn green" onclick="genPDF()">Generate PDF V10.3 with PHOTOS+QR</button>
+<button class="btn green" onclick="genPDF()">Generate PDF V10.4 with PHOTOS+QR</button>
 </div>
 </div>
 <input type="file" id="camInput" accept="image/*" capture="environment" style="display:none">
@@ -75,9 +75,9 @@ function render(){let cont=document.getElementById('items');cont.innerHTML='';da
 function toggle(c,i){states[c][i]=!states[c][i];render();}
 function takePhoto(c,i){tempCat=c;tempIdx=i;document.getElementById('camInput').click();}
 document.getElementById('camInput').addEventListener('change',function(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=ev=>{photos[tempCat][tempIdx]=ev.target.result;render();};r.readAsDataURL(f);e.target.value='';});
-function genQR(){let p=document.getElementById('project').value,co=document.getElementById('company').value,z=document.getElementById('zone').value,a=document.getElementById('area').value;let txt=`Project:${p}\nCompany:${co}\nZone:${z}\nArea:${a}\nDate:${new Date().toLocaleString()}\nInspector:Adel Mohamed\nhttps://am5203847-stack.github.io/ADEL-HSE-V9/`;document.getElementById('qrtext').textContent=co||'QR Report';let box=document.getElementById('qrcode');box.innerHTML='';new QRCode(box,{text:txt,width:120,height:120});}
+function genQR(){let p=document.getElementById('project').value,co=document.getElementById('company').value||'Company',z=document.getElementById('zone').value||'',a=document.getElementById('area').value||'';let txt=`Project:${p} | Company:${co} | Zone:${z} | Area:${a}m2 | Date:${new Date().toLocaleString()} | Inspector:Adel Mohamed | SBG Rakaez`;document.getElementById('qrtext').textContent=co;document.getElementById('qrImg').src='https://api.qrserver.com/v1/create-qr-code/?size=150x150&data='+encodeURIComponent(txt);}
 let canvas=document.getElementById('sig'),ctx=canvas.getContext('2d'),draw=false;setTimeout(()=>{let r=window.devicePixelRatio||1;canvas.width=canvas.offsetWidth*r;canvas.height=150*r;ctx.setTransform(r,0,0,r,0,0);ctx.lineWidth=2;ctx.lineCap='round';ctx.strokeStyle='#000';genQR();},400);canvas.addEventListener('pointerdown',e=>{draw=true;ctx.beginPath();ctx.moveTo(e.offsetX,e.offsetY);});canvas.addEventListener('pointermove',e=>{if(!draw)return;ctx.lineTo(e.offsetX,e.offsetY);ctx.stroke();});window.addEventListener('pointerup',()=>draw=false);function clearSig(){ctx.clearRect(0,0,canvas.width,canvas.height)}
-function genPDF(){const {jsPDF}=window.jspdf;let doc=new jsPDF();let insp=document.getElementById('inspector').value,proj=document.getElementById('project').value,comp=document.getElementById('company').value||'N/A',zone=document.getElementById('zone').value||'N/A',area=document.getElementById('area').value||'N/A',eng=document.getElementById('engName').value||'N/A',notes=document.getElementById('notes').value||'N/A';let now=new Date();let ds=String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear()+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');doc.setFont('helvetica','bold');doc.setFontSize(14);doc.text('HSE Inspection Report - SBG Rakaez A-4',10,15);doc.setFont('helvetica','normal');doc.setFontSize(11);doc.text('Project: '+proj,10,25);doc.text('Company: '+comp,10,32);doc.text('Zone: '+zone+' | Area: '+area+' m2',10,39);doc.text('Inspector: '+insp,10,46);doc.text('Date: '+ds,10,53);doc.text('Engineer: '+eng,10,60);try{let qc=document.querySelector('#qrcode canvas');if(qc){let qi=qc.toDataURL('image/png');doc.addImage(qi,'PNG',160,25,35,35);}}catch(e){}let y=75;Object.keys(data).forEach(cat=>{doc.setFont('helvetica','bold');doc.text(cat.toUpperCase()+' - '+data[cat].length+' Items:',10,y);y+=7;doc.setFont('helvetica','normal');data[cat].forEach((t,i)=>{doc.text((i+1)+'. '+t+' : '+(states[cat][i]?'OK':'NOT OK'),12,y);if(photos[cat][i]){try{doc.addImage(photos[cat][i],'JPEG',120,y-4,18,12);}catch(e){}}y+=7;if(y>275){doc.addPage();y=15}});y+=4;if(y>275){doc.addPage();y=15}});doc.text('Notes: '+notes,10,y);y+=10;doc.text('Inspector Signature:',10,y);try{if(canvas.toDataURL()!==document.createElement('canvas').toDataURL()){let img=canvas.toDataURL('image/png');doc.addImage(img,'PNG',10,y+5,60,20);}}catch(e){}doc.save('HSE_'+comp+'_'+now.toISOString().slice(0,10)+'.pdf');}render();
+function genPDF(){const {jsPDF}=window.jspdf;let doc=new jsPDF();let insp=document.getElementById('inspector').value,proj=document.getElementById('project').value,comp=document.getElementById('company').value||'N/A',zone=document.getElementById('zone').value||'N/A',area=document.getElementById('area').value||'N/A',eng=document.getElementById('engName').value||'N/A',notes=document.getElementById('notes').value||'N/A';let now=new Date();let ds=String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear()+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');doc.setFont('helvetica','bold');doc.setFontSize(14);doc.text('HSE Inspection Report - SBG Rakaez A-4',10,15);doc.setFont('helvetica','normal');doc.setFontSize(11);doc.text('Project: '+proj,10,25);doc.text('Company: '+comp,10,32);doc.text('Zone: '+zone+' | Area: '+area+' m2',10,39);doc.text('Inspector: '+insp,10,46);doc.text('Date: '+ds,10,53);doc.text('Engineer: '+eng,10,60);try{let qi=document.getElementById('qrImg').src;doc.addImage(qi,'PNG',160,25,35,35);}catch(e){}let y=75;Object.keys(data).forEach(cat=>{doc.setFont('helvetica','bold');doc.text(cat.toUpperCase()+' - '+data[cat].length+' Items:',10,y);y+=7;doc.setFont('helvetica','normal');data[cat].forEach((t,i)=>{doc.text((i+1)+'. '+t+' : '+(states[cat][i]?'OK':'NOT OK'),12,y);if(photos[cat][i]){try{doc.addImage(photos[cat][i],'JPEG',120,y-4,18,12);}catch(e){}}y+=7;if(y>275){doc.addPage();y=15}});y+=4;if(y>275){doc.addPage();y=15}});doc.text('Notes: '+notes,10,y);y+=10;doc.text('Inspector Signature:',10,y);try{if(canvas.toDataURL()!==document.createElement('canvas').toDataURL()){let img=canvas.toDataURL('image/png');doc.addImage(img,'PNG',10,y+5,60,20);}}catch(e){}doc.save('HSE_'+comp+'_'+now.toISOString().slice(0,10)+'.pdf');}render();
 </script>
 </body>
 </html>
