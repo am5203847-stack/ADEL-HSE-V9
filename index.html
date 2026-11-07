@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADEL V9 FULL HSE</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#000;color:#FFD700;font-family:Tahoma;padding:10px;padding-bottom:90px}
+.header{border:3px solid #00FF7F;border-radius:22px;padding:16px;text-align:center;background:#0a0a0a;margin-bottom:12px}
+.header h1{color:#00FF7F;font-size:24px}
+.progress{text-align:center;margin:10px 0;font-weight:bold}
+.company{display:flex;gap:6px;margin:10px 0}
+.company input{flex:1;background:#1a1a1a;border:1.5px solid #FFD700;border-radius:12px;padding:12px;color:#FFD700;text-align:center}
+.save{width:100%;background:#FFD700;color:#000;border:none;border-radius:14px;padding:13px;font-weight:bold}
+.select{border:2px solid #FFD700;border-radius:18px;padding:14px;background:#0f0f0f;margin-bottom:12px}
+.select h3{text-align:center;margin-bottom:10px}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.card{background:#1a1a1a;border:1.5px solid #FFD700;border-radius:12px;padding:12px;text-align:center;cursor:pointer}
+.card.active{background:#FFD700;color:#000;font-weight:bold}
+.card span{font-size:22px;display:block}
+.list{border:2px solid #FFD700;border-radius:18px;padding:14px;background:#0f0f0f;display:none}
+.list.active{display:block}
+.item{display:flex;align-items:center;justify-content:space-between;background:#1a1a1a;border:1px solid #333;border-radius:11px;padding:9px 10px;margin-bottom:7px}
+.item.done{background:#003300;border-color:#00FF7F}
+.item label{flex:1;text-align:right;margin-right:8px;color:#fff;font-size:13px}
+.item.done label{color:#00FF7F}
+.foot{position:fixed;bottom:0;left:0;right:0;display:flex;gap:6px;padding:10px;background:#000}
+.foot button{flex:1;padding:12px;border-radius:12px;border:none;font-weight:bold}
+.b1{background:#00FF7F;color:#000}
+.b2{background:#222;color:#FFD700;border:1px solid #FFD700}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>ADEL V9 FULL HSE ✅</h1>
+<p>منصة السلامة الشاملة - 6 أنظمة</p>
+<p style="color:#fff;font-size:12px">SBG | شركة النخبة Rakaez A-4/h | V9 FINAL - Online ✅</p>
+<div class="company"><input id="comp" placeholder="اسم الشركة"><input id="proj" placeholder="المشروع"></div>
+<div class="company"><input id="area" placeholder="المساحة m2"><input id="zone" placeholder="المنطقة"></div>
+<button class="save" onclick="localStorage.setItem('comp',document.getElementById('comp').value);alert('تم الحفظ ✅')">💾 حفظ بيانات الشركة</button>
+<div class="progress" id="prog">اختر نوع الفحص</div>
+</div>
+<div class="select">
+<h3>اختر نوع الفحص:</h3>
+<div class="grid">
+<div class="card active" onclick="show('forklift',this)"><span>🚜</span>فوركلفت<br>29</div>
+<div class="card" onclick="show('scaffold',this)"><span>🧱</span>سقالات<br>30</div>
+<div class="card" onclick="show('crane',this)"><span>🏗️</span>كرين<br>25</div>
+<div class="card" onclick="show('elec',this)"><span>⚡</span>كهرباء<br>20</div>
+<div class="card" onclick="show('ptw',this)"><span>🔥</span>تصاريح<br>PTW</div>
+<div class="card" onclick="show('ppe',this)"><span>🪖</span>PPE<br>عمال</div>
+</div>
+</div>
+<div id="forklift" class="list active"><h3>فحص الفوركلفت - 29 بند</h3><div id="l-forklift"></div></div>
+<div id="elec" class="list"><h3>فحص الكهرباء - 20 بند</h3><div id="l-elec"></div></div>
+<div id="scaffold" class="list"><h3>فحص السقالات - 30 بند</h3><div id="l-scaffold"></div></div>
+<div id="crane" class="list"><h3>فحص الكرين - 25 بند</h3><div id="l-crane"></div></div>
+<div id="ptw" class="list"><h3>تصاريح العمل PTW</h3><div id="l-ptw"></div></div>
+<div id="ppe" class="list"><h3>PPE العمال</h3><div id="l-ppe"></div></div>
+<div class="foot"><button class="b1" onclick="report()">📄 تقرير واتساب</button><button class="b2" onclick="resetA()">🔄 تصفير</button></div>
+<script>
+const D={forklift:["زيت المحرك","مياه الردياتير","زيت الهيدروليك","البطارية والاقطاب","الاطارات وضغطها","الفرامل اليدوية والقدم","الاضواء والفلاشر","البوري والانذار الخلفي","حزام الامان","مرايا الرؤية","شوكات الرفع - تشققات","سلاسل الرفع","نظام التوجيه","طفاية الحريق","شهادة الفحص","رخصة السائق","نظافة الفوركلفت","تسريب زيوت","عمر الاطارات","البطارية - شحن","لوحة التحكم","فرامل الطوارئ","انذار الرجوع","حالة الشوكة - تآكل","نظام الهيدروليك - خراطيم","الكرسي وحالته","قفل الشوكة","سجل الصيانة","التدريب والتصريح"],elec:["Main Panel","Breakers","Wiring","Sockets","Lighting","Earth","DB Dressing","Cable Trays","Isolation","LOTO","RCD Test","Labels","Clearance","Fire Extinguisher","PPE Electrical","Permit","Insulated Tools","Cable Condition","Overload","Final Inspection"],scaffold:Array.from({length:30},(_,i)=>`بند سقالات ${i+1}`),crane:Array.from({length:25},(_,i)=>`بند كرين ${i+1}`),ptw:["تصريح حار","تصريح بارد","تصريح ارتفاعات","تصريح حفر","تصريح مكان مغلق","تصريح كهرباء","اغلاق التصريح"],ppe:["خوذة","سيفتي","نظارة","جوانتي","حزام امان","كمامة","واقي اذن","فيست عاكس"]};
+function render(){for(let k in D){let c=document.getElementById('l-'+k);c.innerHTML='';D[k].forEach((t,i)=>{let id=k+'-'+i;let d=document.createElement('div');d.className='item';d.innerHTML=`<input type="checkbox" id="${id}" onchange="tg(this)"><label for="${id}">${t}</label>`;c.appendChild(d);if(localStorage.getItem(id)=='1'){document.getElementById(id).checked=true;d.classList.add('done')}});}up();}
+function tg(cb){cb.parentElement.classList.toggle('done',cb.checked);localStorage.setItem(cb.id,cb.checked?'1':'0');up();}
+function up(){let tot=0,don=0;for(let k in D){D[k].forEach((_,i)=>{tot++;if(document.getElementById(k+'-'+i)?.checked) don++;});}document.getElementById('prog').innerText=`تم: ${don}/${tot} - ${Math.round(don/tot*100)}% | FORK: ${cnt('forklift')}/29 - ELEC: ${cnt('elec')}/20`;}
+function cnt(k){let c=0;D[k].forEach((_,i)=>{if(document.getElementById(k+'-'+i)?.checked) c++;});return c;}
+function show(id,el){document.querySelectorAll('.list').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.card').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');el.classList.add('active');}
+function report(){let t=`*تقرير HSE - SBG Rakaez A-4/h*%0AV9 FULL%0Aالشركة: ${document.getElementById('comp').value}%0A`;for(let k in D){let c=cnt(k);t+=`*${k}: ${c}/${D[k].length}*%0A`;D[k].forEach((txt,i)=>{let ch=document.getElementById(k+'-'+i)?.checked?'✅':'❌';t+=`${ch} ${txt}%0A`;});t+='%0A';}window.open('https://wa.me/?text='+t,'_blank');}
+function resetA(){if(confirm('تصفير؟')){Object.keys(D).forEach(k=>D[k].forEach((_,i)=>localStorage.removeItem(k+'-'+i)));document.querySelectorAll('input[type=checkbox]').forEach(x=>{x.checked=false;x.parentElement.classList.remove('done')});up();}}
+render();
+</script>
+</body>
+</html>
