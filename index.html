@@ -3,47 +3,103 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HSE SBG Rakaez V9.3 PDF</title>
+<title>HSE SBG Rakaez V9.4</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-body{background:#0f172a;color:white;font-family:system-ui;padding:15px}
-.card{border:2px solid #eab308;border-radius:15px;padding:15px;background:#1e293b;margin-bottom:15px}
-canvas{background:white;border-radius:10px;width:100%;height:180px;touch-action:none}
-button{padding:14px;border-radius:10px;border:none;font-weight:bold;width:100%;margin-top:8px}
-.btn-green{background:#16a34a;color:white}
-.btn-blue{background:#2563eb;color:white}
-.btn-yellow{border:2px solid #eab308;background:transparent;color:#eab308}
+body{background:#0f1115;color:#fff;font-family:system-ui;padding:15px}
+.card{border:1.5px solid #d4af37;border-radius:18px;padding:16px;background:#151821}
+h2{text-align:center;color:#d4af37}
+canvas{background:#fff;border-radius:12px;width:100%;height:220px;touch-action:none}
+.btn{width:100%;padding:14px;border-radius:12px;border:0;margin-top:10px;font-size:17px;font-weight:700;cursor:pointer}
+.green{background:#16a34a;color:#fff}
+.blue{background:#2563eb;color:#fff}
+.outline{background:transparent;border:1px solid #d4af37;color:#d4af37}
+input,select{width:100%;padding:10px;border-radius:10px;margin:6px 0;background:#0f1115;color:#fff;border:1px solid #444}
+label{font-size:14px;color:#d4af37}
+.item{border-bottom:1px solid #222;padding:8px 0;display:flex;justify-content:space-between;align-items:center}
 </style>
 </head>
 <body>
-<h2 style="text-align:center">تقرير HSE SBG Rakaez V9.3</h2>
 <div class="card">
-<h3>✍️ توقيع المفتش - اسحب باصبعك</h3>
-<canvas id="sigCanvas"></canvas>
-<div style="display:flex;gap:8px">
-<button class="btn-green" onclick="saveSig()">حفظ التوقيع</button>
-<button class="btn-yellow" onclick="clearSig()">مسح</button>
+<h2>✍️ توقيع المفتش - اسحب باصبعك</h2>
+<canvas id="sig"></canvas>
+<div style="display:flex;gap:8px;margin-top:8px">
+<button class="btn outline" style="width:50%" onclick="clearSig()">تصفير</button>
+<button class="btn green" style="width:50%" onclick="saveSig()">✅ حفظ التوقيع</button>
 </div>
-<p id="sigStatus">لم يتم التوقيع</p>
+
+<label>الموقع / Location</label>
+<input id="loc" placeholder="Rakaez - Zone 3">
+
+<label>اسم المفتش</label>
+<input id="inspector" value="Adel Mohamed">
+
+<div id="checklist"></div>
+
+<button class="btn green" onclick="sendWA()">📄 تقرير واتساب نظيف</button>
+<button class="btn blue" onclick="exportPDF()">📄 تصدير PDF بالتوقيع</button>
+<button class="btn outline" onclick="clearAll()">تصفير الكل</button>
 </div>
-<div class="card">
-<button class="btn-green" onclick="generateWhatsAppReport()">📄 تقرير واتساب نظيف</button>
-<button class="btn-blue" onclick="exportPDF()">📄 تصدير PDF بالتوقيع</button>
-<button class="btn-yellow" onclick="if(confirm('تصفير؟')){localStorage.clear();location.reload()}">تصفير</button>
-</div>
+
 <script>
-const canvas=document.getElementById('sigCanvas');const ctx=canvas.getContext('2d');let drawing=false,hasSig=false;
-function resize(){canvas.width=canvas.offsetWidth*2;canvas.height=360;ctx.scale(2,2);ctx.lineWidth=5;ctx.lineCap='round';ctx.strokeStyle='#000'}resize();
-function pos(e){const r=canvas.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return {x:t.clientX-r.left,y:t.clientY-r.top}}
-canvas.addEventListener('mousedown',e=>{drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y)});
-canvas.addEventListener('touchstart',e=>{e.preventDefault();drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y)},{passive:false});
-canvas.addEventListener('mousemove',e=>{if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();hasSig=true});
-canvas.addEventListener('touchmove',e=>{e.preventDefault();if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();hasSig=true},{passive:false});
-window.addEventListener('mouseup',()=>drawing=false);window.addEventListener('touchend',()=>drawing=false);
-function saveSig(){if(!hasSig){alert('وقع الاول');return}localStorage.setItem('hse_signature',canvas.toDataURL());document.getElementById('sigStatus').innerText='✅ تم حفظ التوقيع';alert('✅ تم حفظ التوقيع');}
-function clearSig(){ctx.clearRect(0,0,canvas.width,canvas.height);hasSig=false;localStorage.removeItem('hse_signature');document.getElementById('sigStatus').innerText='لم يتم التوقيع';}
-function generateWhatsAppReport(){let sig=localStorage.getItem('hse_signature')?'✅ تم التوقيع':'❌ بدون توقيع';alert('تقرير HSE - '+sig);}
-function exportPDF(){const s=localStorage.getItem('hse_signature');if(!s){alert('⚠️ وقع الاول ودوس حفظ التوقيع');return}const {jsPDF}=window.jspdf;const doc=new jsPDF('p','mm','a4');doc.text('HSE SBG Rakaez V9.3 - Adel - '+new Date().toLocaleDateString(),10,15);doc.text('Location: Rakaez A-4/h - SBG',10,25);doc.addImage(s,'PNG',10,35,70,30);doc.save('HSE-Rakaez-'+Date.now()+'.pdf');}
+const canvas=document.getElementById('sig');
+const ctx=canvas.getContext('2d');
+let drawing=false, hasSig=false, sigData="";
+function resize(){canvas.width=canvas.offsetWidth*2;canvas.height=220*2;ctx.scale(2,2);ctx.lineWidth=3;ctx.lineCap='round';ctx.strokeStyle='#000'}
+resize();
+function getPos(e){const r=canvas.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:t.clientX-r.left,y:t.clientY-r.top}}
+canvas.addEventListener('mousedown',e=>{drawing=true;const p=getPos(e);ctx.beginPath();ctx.moveTo(p.x,p.y)});
+canvas.addEventListener('mousemove',e=>{if(!drawing)return;const p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();hasSig=true});
+canvas.addEventListener('mouseup',()=>drawing=false);
+canvas.addEventListener('touchstart',e=>{drawing=true;const p=getPos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault()},{passive:false});
+canvas.addEventListener('touchmove',e=>{if(!drawing)return;const p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();hasSig=true;e.preventDefault()},{passive:false});
+canvas.addEventListener('touchend',()=>drawing=false);
+function clearSig(){ctx.clearRect(0,0,canvas.width,canvas.height);hasSig=false;sigData=""}
+function saveSig(){if(!hasSig){alert('⚠️ وقع الاول');return}sigData=canvas.toDataURL('image/png');localStorage.setItem('adel_sig',sigData);alert('✅ تم حفظ التوقيع')}
+if(localStorage.getItem('adel_sig')){sigData=localStorage.getItem('adel_sig');hasSig=true}
+
+const items=["Safety Helmet","Safety Shoes","Vest","Harness","Scaffold Inspection","Ladder Safety","Electrical Safety","Fire Extinguisher","Housekeeping","Barrication"];
+const list=document.getElementById('checklist');
+items.forEach((it,i)=>{
+ const d=document.createElement('div');d.className='item';
+ d.innerHTML=`<span>${i+1}. ${it}</span><select id="it${i}"><option>✅ OK</option><option>❌ N/A</option><option>⚠️ Action</option></select>`;
+ list.appendChild(d);
+});
+
+function getReportText(){
+ let txt=`*HSE Report - SBG Rakaez*\nInspector: ${document.getElementById('inspector').value}\nLocation: ${document.getElementById('loc').value}\nDate: ${new Date().toLocaleDateString('en-GB')}\n\n`;
+ items.forEach((it,i)=>{txt+=`${i+1}. ${it}: ${document.getElementById('it'+i).value}\n`});
+ txt+=`\nSigned: ${document.getElementById('inspector').value}`;
+ return txt;
+}
+function sendWA(){
+ const txt=encodeURIComponent(getReportText());
+ window.open(`https://wa.me/?text=${txt}`,'_blank');
+}
+async function exportPDF(){
+ if(!hasSig||!sigData){alert('⚠️ وقع الاول ودوس حفظ التوقيع');return}
+ const {jsPDF}=window.jspdf;
+ const doc=new jsPDF();
+ doc.setFont('helvetica','bold');
+ doc.text('HSE Inspection Report - SBG Rakaez',10,15);
+ doc.setFont('helvetica','normal');
+ doc.setFontSize(11);
+ doc.text(`Inspector: ${document.getElementById('inspector').value}`,10,25);
+ doc.text(`Location: ${document.getElementById('loc').value}`,10,32);
+ doc.text(`Date: ${new Date().toLocaleDateString('en-GB')} ${new Date().toLocaleTimeString()}`,10,39);
+ let y=50;
+ items.forEach((it,i)=>{
+  if(y>270){doc.addPage();y=15}
+  doc.text(`${i+1}. ${it} : ${document.getElementById('it'+i).value}`,10,y);
+  y+=7;
+ });
+ if(y>220){doc.addPage();y=15}
+ doc.text('Inspector Signature:',10,y+10);
+ doc.addImage(sigData,'PNG',10,y+15,60,25);
+ doc.text(document.getElementById('inspector').value,10,y+45);
+ doc.save(`HSE_Adel_${new Date().toISOString().slice(0,10)}.pdf`);
+}
+function clearAll(){if(confirm('تصفير؟')){clearSig();localStorage.clear();location.reload()}}
 </script>
 </body>
 </html>
